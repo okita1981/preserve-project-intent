@@ -69,6 +69,14 @@ def verify_trigger_fixtures() -> None:
                 fail(f"empty prompt in {group}")
             if not isinstance(case.get("reason"), str) or not case["reason"].strip():
                 fail(f"empty reason in {group}")
+            allowed = {
+                "TRIGGER_INIT",
+                "TRIGGER_CONTROL",
+                "TRIGGER_HANDOFF",
+                "TRIGGER_RESUME",
+            } if group == "should_trigger" else {"DO_NOT_TRIGGER"}
+            if case.get("expected") not in allowed:
+                fail(f"invalid expected value in {group}")
     boundary_cases = data.get("boundary_cases")
     if not isinstance(boundary_cases, list) or len(boundary_cases) < 6:
         fail("boundary_cases must contain at least six cases")

@@ -58,6 +58,12 @@ blocker:
   contract_frozen_at: <timestamp or null>
   approved_revisions:
     - <old value, new value, evidence, scope effect, and user approval>
+  depth1_solution: <current corrective approach or null>
+  depth2_findings:
+    - id: <stable identifier>
+      summary: <finding produced by the current Depth 1 solution>
+      status: OPEN | RESOLVED | PARKED
+      disposition: <action or decision>
 
 return_point:
   id: <task or decision identifier>
@@ -88,6 +94,7 @@ next_action:
 - `completed` records outcomes, not effort expended.
 - `not_completed` must include the higher-level work left open after a task or blocker closes.
 - A cleared blocker may remain in the state for continuity, but its return point becomes active.
+- Derive the breadth count from `depth2_findings`; do not store a separate count. Keep resolved and parked findings because accumulated breadth is the signal. If the Depth 1 solution is replaced, preserve the old findings in history or decisions before starting the new solution's list.
 - History must not overwrite current truth. When facts changed, state the current value and put the old value in the history section.
 - Do not place credentials, tokens, or unnecessary personal data in a handoff.
 

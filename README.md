@@ -53,6 +53,10 @@ flowchart TD
 | `HANDOFF` | セッション終了時 | 詳細な引き継ぎ正本`.md`＋次セッション用プロンプト |
 | `RESUME` | 新セッション開始時 | 現在地の理解確認、矛盾検出、本線の再開地点 |
 
+最初に継続プロジェクトの存在を判定します。継続の意図がなければSkillを使用しません。過去作業の継続が意図されている一方、Missionや現在地を推測せず回収できる正本がない場合は、RESUMEやINITを装わず`ROUTING: ASK_FOR_STATE`としてhandoff、stateファイル、または正本を求めます。
+
+Skill適用時の最初の状態報告では`MODE: INIT`、`MODE: CONTROL`、`MODE: HANDOFF`、`MODE: RESUME`のいずれかを宣言します。明示的に呼び出されたものの対象外だった場合だけ`ROUTING: NOT_APPLICABLE`を返します。
+
 ### 派生課題の分類
 
 | 分類 | 扱い |
@@ -85,6 +89,8 @@ RESUMEの整合判定は、正本を機械的に1件以上照合した`HANDOFF_A
 ### 任意の状態永続化
 
 長期プロジェクトでは、INIT時に保存先を承認して、`.preserve-intent/state.yaml`などをProject State正本として使用できます。既定はOFFです。有効化した場合も、Milestone変更、Blocker開始・解消、Return Point変更、HANDOFFなどの重要な遷移時だけ更新し、commit、push、deployや外部変更の権限は付与しません。
+
+Blockerの`depth2_findings`には、同じDepth 1解決策から発生した派生課題を解決済み・Parking済みも含めて保持します。件数は一覧から導出し、HANDOFFを跨いでもBreadth limitをリセットしません。
 
 ## 使い方
 

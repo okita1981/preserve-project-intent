@@ -73,6 +73,7 @@ Before delivering the handoff, verify:
 - Local completion is not presented as project completion.
 - `not_completed` is explicit.
 - Every cleared blocker has a return point.
+- Known Depth 2 findings remain recorded across the handoff, including resolved and parked findings.
 - The next action advances or restores the milestone.
 - Non-goals prevent the known plausible drift.
 - Operational permissions are not enlarged by the handoff.

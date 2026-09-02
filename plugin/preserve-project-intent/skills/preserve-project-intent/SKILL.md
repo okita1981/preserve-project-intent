@@ -30,13 +30,16 @@ For a new or materially re-scoped project, read [Project state schema](reference
 
 Choose the mode with this procedure:
 
-1. No canonical state exists, or the mission, milestone outcome, success condition, primary metric, non-goal, or operation boundary is being changed: **INIT**.
-2. An existing project is being executed, reviewed, corrected, or unblocked: **CONTROL**.
-3. The session or agent is being changed: **HANDOFF**.
-4. Existing state is being consumed to restart work: **RESUME**.
-5. No continuing mission, milestone, or return point exists: do not use this skill.
+1. **Continuing Project Gate** — if there is no explicit multi-session intent, stated larger project, handoff request, or continuation cue, do not use this skill. If the user explicitly invoked it, report `ROUTING: NOT_APPLICABLE`; for implicit selection, add no project ceremony.
+2. **Missing Continuation State** — if prior work is meant to continue but no handoff, canonical state, or authoritative material can recover its mission and current position without guessing, report `ROUTING: ASK_FOR_STATE`. Request the missing state or offer INIT; do not mutate project or external state.
+3. The current state is being transferred to another session or agent: **HANDOFF**.
+4. Recoverable existing state is being consumed to restart work: **RESUME**.
+5. A new continuing project is being established, or its mission, milestone outcome, success condition, primary metric, non-goal, or operation boundary is being changed: **INIT**.
+6. An established continuing project is being executed, reviewed, corrected, or unblocked: **CONTROL**.
 
 Use the lightest applicable mode. A material re-scope means changing one of the state elements listed for INIT; it is not merely changing implementation detail.
+
+When this skill applies, begin the first material response with `MODE: INIT`, `MODE: CONTROL`, `MODE: HANDOFF`, or `MODE: RESUME`. Declare it again only when the mode changes. Routing outcomes use `ROUTING: ASK_FOR_STATE` or, only after explicit invocation, `ROUTING: NOT_APPLICABLE`.
 
 ## Control the active work
 
@@ -107,6 +110,8 @@ Read and follow [Handoff protocol](references/handoff-protocol.md). Use the cano
 ## RESUME mode
 
 Read the handoff completely before changing code, data, production, documents, or external state. Then:
+
+If continuation is intended but recoverable state is unavailable, do not claim RESUME or reconstruct the project from guesswork. Report `ROUTING: ASK_FOR_STATE` and request the handoff, state file, authoritative material, or authorization to re-establish state with INIT.
 
 1. extract the canonical state;
 2. compare it with the detailed body;
