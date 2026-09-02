@@ -1,0 +1,76 @@
+{
+  "should_trigger": [
+    {
+      "prompt": "この長期プロジェクトのMissionと現在のMilestoneを固定してから続けてください。",
+      "reason": "A continuing project needs canonical intent and completion boundaries."
+    },
+    {
+      "prompt": "本線の作業中にProduction手順の問題が見つかりました。必要十分な是正範囲と戻り先を整理してください。",
+      "reason": "A blocker interrupts a larger active project."
+    },
+    {
+      "prompt": "次のセッションに渡す詳細なhandoffと起動プロンプトを作ってください。",
+      "reason": "Cross-session state transfer is requested."
+    },
+    {
+      "prompt": "添付した引き継ぎ正本を確認し、未完了の本線から再開してください。",
+      "reason": "Existing project state is being consumed for resume."
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "prompt": "この関数の型エラーを1件直してください。",
+      "reason": "An isolated fix has no continuing project hierarchy."
+    },
+    {
+      "prompt": "READMEの誤字を1文字修正してください。",
+      "reason": "A bounded one-step edit does not need project ceremony."
+    },
+    {
+      "prompt": "この文章を英語に翻訳してください。",
+      "reason": "A standalone transformation has no mission or return point."
+    },
+    {
+      "prompt": "今日の東京の天気を教えてください。",
+      "reason": "A current information request is unrelated to continuing project control."
+    }
+  ],
+  "boundary_cases": [
+    {
+      "prompt": "テストが落ちてるので直して。",
+      "context": "No continuing project, mission, milestone, or return point is stated.",
+      "expected": "DO_NOT_TRIGGER",
+      "reason": "A standalone test repair should not acquire project ceremony."
+    },
+    {
+      "prompt": "テストが落ちて本線が止まっています。最小限直して元の実装へ戻ってください。",
+      "context": "The conversation already states the larger project and current milestone.",
+      "expected": "TRIGGER_CONTROL",
+      "reason": "The failing test is explicitly a blocker inside a continuing project."
+    },
+    {
+      "prompt": "この設計、リファクタしたほうがいい？",
+      "context": "This is an isolated design question with no stated continuing project.",
+      "expected": "DO_NOT_TRIGGER",
+      "reason": "General design advice alone is not project intent control."
+    },
+    {
+      "prompt": "Blocker是正中の仕組みにレビュー指摘が増えています。リファクタを続けるべき？",
+      "context": "A stated main-line milestone, frozen blocker contract, and return point exist.",
+      "expected": "TRIGGER_CONTROL",
+      "reason": "The question concerns scope capture inside corrective work."
+    },
+    {
+      "prompt": "昨日の続きやろう。",
+      "context": "No handoff, canonical state, mission, or return point is available in this session.",
+      "expected": "ASK_FOR_STATE",
+      "reason": "Resume must not be claimed without recoverable project state."
+    },
+    {
+      "prompt": "昨日の続きやろう。",
+      "context": "A canonical handoff naming the mission, milestone, authoritative artifacts, and return point is attached.",
+      "expected": "TRIGGER_RESUME",
+      "reason": "Available canonical state supports RESUME mode."
+    }
+  ]
+}

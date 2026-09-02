@@ -64,9 +64,9 @@ flowchart TD
 
 派生課題の中からさらに課題が見つかった場合や、新しい解析基盤・汎用機構が必要になった場合は、無条件に進めずScope Expansion Checkpointを行います。
 
-Blocker作業を開始した時点で、`minimum_resolution`、`evidence_to_clear`、`return_point`、`non_goals`を凍結します。新しい証拠によって変更が必要になった場合も、Agentの自己判断では拡張せず、変更前後・理由・影響を示してユーザーの明示承認を得ます。
+原因診断後、`minimum_resolution`、`evidence_to_clear`、`return_point`、`non_goals`をBlocker契約として最初に記録した時点で凍結します。新しい証拠によって変更が必要になった場合も、Agentの自己判断では拡張せず、変更前後・理由・影響を示してユーザーの明示承認を得ます。
 
-派生深度は、本線をDepth 0、直接のBlockerをDepth 1、Blocker内で見つかった課題をDepth 2として扱います。Depth 2は必ずCheckpoint、Depth 3以上は原則Parkingです。
+派生深度は、本線をDepth 0、直接のBlockerをDepth 1、Blocker内で見つかった課題をDepth 2として扱います。Depth 2は必ずCheckpoint、Depth 3以上は原則Parkingです。同じDepth 1解決策からDepth 2が3件出た場合は個別処理を止め、解決策そのものを簡素化・置換・撤去できないか再検討します。
 
 ## セッションを跨ぐ仕組み
 
@@ -196,13 +196,14 @@ plugins/preserve-project-intent/         Codex Plugin
 plugin/preserve-project-intent/          Claude Code Plugin
 .agents/plugins/marketplace.json         Codex向けMarketplace定義
 scripts/                                 同期・構造・同一性の検証
-evals/                                   発火すべき／すべきでない入力fixture
+fixtures/                                将来の発火評価に使う入力fixture
 .github/workflows/verify.yml             push / PRごとのCI
 ```
 
 ## 制約
 
 - 自動発動は各ホストの選択を含むため、100%は保証されません。重要な開始・引き継ぎ・再開では明示的に呼び出してください。
+- `fixtures/trigger-cases.json`は将来の実モデル評価用データです。CIはファイル構造だけを確認し、Skillの発火精度やモデル挙動を評価していません。
 - Skillだけでプロジェクト固有の状態は永続化されません。引き継ぎ正本またはプロジェクトのCanonical Stateを維持してください。
 - 状態永続化はオプトインです。保存先とファイル変更が承認されていない場合、Skillは状態ファイルを書きません。
 - このSkillは、必要な安全対策や検証を省略するためのものではありません。本線との関係とリスクに比例した必要十分性を判断します。

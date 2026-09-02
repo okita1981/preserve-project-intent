@@ -56,8 +56,9 @@ def verify_manifests() -> None:
         fail("Codex and Claude plugin versions differ")
 
 
-def verify_eval_cases() -> None:
-    path = ROOT / "evals" / "trigger-cases.json"
+def verify_trigger_fixtures() -> None:
+    """Validate fixture structure only; this does not evaluate model behavior."""
+    path = ROOT / "fixtures" / "trigger-cases.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     for group in ("should_trigger", "should_not_trigger"):
         cases = data.get(group)
@@ -68,13 +69,22 @@ def verify_eval_cases() -> None:
                 fail(f"empty prompt in {group}")
             if not isinstance(case.get("reason"), str) or not case["reason"].strip():
                 fail(f"empty reason in {group}")
+    boundary_cases = data.get("boundary_cases")
+    if not isinstance(boundary_cases, list) or len(boundary_cases) < 6:
+        fail("boundary_cases must contain at least six cases")
+    for case in boundary_cases:
+        for field in ("prompt", "context", "reason"):
+            if not isinstance(case.get(field), str) or not case[field].strip():
+                fail(f"empty {field} in boundary_cases")
+        if case.get("expected") not in {"TRIGGER_CONTROL", "TRIGGER_RESUME", "DO_NOT_TRIGGER", "ASK_FOR_STATE"}:
+            fail("invalid expected value in boundary_cases")
 
 
 def main() -> int:
     try:
         verify_skill()
         verify_manifests()
-        verify_eval_cases()
+        verify_trigger_fixtures()
         marketplace = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8"))
         entries = marketplace.get("plugins", [])
         if len(entries) != 1 or entries[0].get("name") != "preserve-project-intent":

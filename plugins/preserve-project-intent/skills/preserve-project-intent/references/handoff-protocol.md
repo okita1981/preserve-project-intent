@@ -92,8 +92,6 @@ Use exactly one evidence level:
 
 Never use an unqualified `HANDOFF_ALIGNED` claim. Do not perform a mutation merely to verify a handoff.
 
-Use `HANDOFF_CONFLICT_FOUND` when a contradiction would change the next action, scope, completion status, or safety boundary. Describe the conflict and wait for resolution when necessary. Minor wording differences that do not affect action may be noted without blocking.
-
 After alignment, continue from `return_point` or `next_action`. Do not reopen a cleared blocker without new evidence.
 
 ## Cross-session and cross-agent use

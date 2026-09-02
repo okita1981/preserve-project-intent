@@ -1,6 +1,6 @@
 ---
 name: preserve-project-intent
-description: Preserve the mission, milestone, completion boundary, and return point in continuing projects. Use when work spans sessions, an existing mission governs the task, a blocker interrupts a larger project, or a handoff is created or consumed. Do not use for isolated one-step tasks without continuing project state.
+description: Preserve the mission, milestone, completion boundary, and return point in continuing projects. Use when work explicitly spans sessions, a blocker interrupts a stated larger project, or a handoff is created or consumed. Do not use for isolated one-step tasks without continuing project state.
 ---
 
 # Preserve Project Intent
@@ -48,7 +48,7 @@ Before entering a blocker, record:
 - explicit non-goals;
 - the evidence that will show it is cleared.
 
-Once blocker work begins, freeze `minimum_resolution`, `evidence_to_clear`, `return_point`, and `non_goals`. Do not revise them on the agent's own judgment. If new evidence proves the contract insufficient, stop at a scope-expansion checkpoint and obtain the user's explicit approval for the old value, new value, reason, and scope effect before continuing.
+Freeze `minimum_resolution`, `evidence_to_clear`, `return_point`, and `non_goals` when they are first recorded together as the blocker contract, before corrective implementation. Set `contract_frozen_at` at that moment. Do not revise them on the agent's own judgment. If new evidence proves the contract insufficient, stop at a scope-expansion checkpoint and obtain the user's explicit approval for the old value, new value, reason, and scope effect before continuing.
 
 Classify new findings as `BLOCKING`, `REQUIRED`, `ADJACENT`, or `OVERREACH`. Work on `BLOCKING` and `REQUIRED` findings within the current scope. Record `ADJACENT` findings for later. Decline or simplify `OVERREACH` unless the user deliberately expands scope.
 
@@ -60,7 +60,7 @@ Trigger a scope-expansion checkpoint when a proposed response to a finding:
 - materially increases implementation or verification relative to the blocked main-line work; or
 - optimizes theoretical completeness instead of restoring safe progress.
 
-Track derivation depth mechanically: the main-line task is Depth 0, its blocker is Depth 1, and a finding discovered inside blocker work is Depth 2. Depth 2 always triggers a checkpoint. Depth 3 or greater is parked by default and must not be started without explicit user approval.
+Depth 2 always triggers a checkpoint. Depth 3 or greater is parked by default. Read [Blocker control](references/blocker-control.md) for depth definitions and the breadth limit.
 
 At the checkpoint, choose among: continue as necessary, use a simpler sufficient fix, park the finding, or ask the user to approve a genuine scope change. Read [Blocker control](references/blocker-control.md) when blockers, nested findings, hardening, review loops, or broad corrective work are involved.
 

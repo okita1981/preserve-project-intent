@@ -41,14 +41,14 @@ Avoid defining the resolution as “prevent every possible recurrence.” Prefer
 
 ### Freeze the contract
 
-When blocker work starts, freeze these fields together:
+Diagnosis may precede the contract. Freeze these fields when they are first recorded together as the proposed resolution contract and before corrective implementation:
 
 - `minimum_resolution`
 - `evidence_to_clear`
 - `return_point`
 - `non_goals`
 
-The agent cannot expand or replace them through self-approval. If new evidence shows the contract is insufficient, stop and request explicit user approval. Record the previous value, proposed value, new evidence, effect on the main line, and approval. Until approval, continue only within the frozen contract or park the new finding.
+Set `contract_frozen_at` at that moment. The agent cannot expand or replace the fields through self-approval. If new evidence shows the contract is insufficient, stop and request explicit user approval. Record the previous value, proposed value, new evidence, effect on the main line, and approval. Until approval, continue only within the frozen contract or park the new finding.
 
 ## Derivation depth
 
@@ -60,6 +60,10 @@ The agent cannot expand or replace them through self-approval. If new evidence s
 | 3+ | Finding derived from another derived finding | Park; do not start without explicit user approval |
 
 Depth is determined by where the finding was discovered, not by how important or technically interesting it appears.
+
+### Breadth limit
+
+Count Depth 2 findings arising from the same Depth 1 solution. When the count reaches three, stop processing them individually and reconsider the Depth 1 solution as a whole. Prefer simplifying, replacing, or removing that solution when it can still satisfy the frozen contract. Further Depth 2 work requires either a simpler path within the contract or explicit user approval for a contract change.
 
 ## Scope-expansion checkpoint
 
@@ -91,6 +95,8 @@ A review finding is evidence about a change, not automatic authority to expand t
 - park it if valid but adjacent;
 - reject or simplify it if it only perfects unnecessary corrective machinery;
 - revisit whether the machinery should exist when repeated findings target its complexity.
+
+Three Depth 2 review findings against the same corrective solution trigger the breadth limit above; do not clear them one by one while leaving the solution itself unquestioned.
 
 Do not count review rounds as progress toward the mission.
 
