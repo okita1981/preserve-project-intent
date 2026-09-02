@@ -1,0 +1,20 @@
+{
+  "name": "preserve-project-intent",
+  "interface": {
+    "displayName": "Preserve Project Intent"
+  },
+  "plugins": [
+    {
+      "name": "preserve-project-intent",
+      "source": {
+        "source": "local",
+        "path": "./plugins/preserve-project-intent"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "preserve-project-intent",
+  "displayName": "Preserve Project Intent",
+  "version": "1.0.0",
+  "description": "Preserves the primary mission, current milestone, completion boundary, and return point across long-running projects, nested blockers, reviews, and session handoffs.",
+  "author": {
+    "name": "Kousuke Okita / 沖田紘亮",
+    "url": "https://github.com/okita1981"
+  },
+  "homepage": "https://github.com/okita1981/preserve-project-intent",
+  "repository": "https://github.com/okita1981/preserve-project-intent",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "project-management",
+    "scope-control",
+    "handoff",
+    "long-running-projects",
+    "ai-agents"
+  ]
+}

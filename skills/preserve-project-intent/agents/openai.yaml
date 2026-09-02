@@ -1,0 +1,7 @@
+interface:
+  display_name: "Preserve Project Intent"
+  short_description: "Keep long projects on mission across blockers and handoffs"
+  default_prompt: "Use $preserve-project-intent to fix the mission, current milestone, completion boundary, and return point before continuing this project."
+
+policy:
+  allow_implicit_invocation: true
