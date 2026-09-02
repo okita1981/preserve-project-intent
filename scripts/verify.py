@@ -45,11 +45,36 @@ def verify_json(path: Path, expected_name: str) -> None:
         fail(f"incorrect name in {path.relative_to(ROOT)}")
 
 
+def verify_manifests() -> None:
+    codex_path = ROOT / "plugins" / "preserve-project-intent" / ".codex-plugin" / "plugin.json"
+    claude_path = ROOT / "plugin" / "preserve-project-intent" / ".claude-plugin" / "plugin.json"
+    verify_json(codex_path, "preserve-project-intent")
+    verify_json(claude_path, "preserve-project-intent")
+    codex = json.loads(codex_path.read_text(encoding="utf-8"))
+    claude = json.loads(claude_path.read_text(encoding="utf-8"))
+    if codex.get("version") != claude.get("version"):
+        fail("Codex and Claude plugin versions differ")
+
+
+def verify_eval_cases() -> None:
+    path = ROOT / "evals" / "trigger-cases.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for group in ("should_trigger", "should_not_trigger"):
+        cases = data.get(group)
+        if not isinstance(cases, list) or len(cases) < 4:
+            fail(f"{group} must contain at least four cases")
+        for case in cases:
+            if not isinstance(case.get("prompt"), str) or not case["prompt"].strip():
+                fail(f"empty prompt in {group}")
+            if not isinstance(case.get("reason"), str) or not case["reason"].strip():
+                fail(f"empty reason in {group}")
+
+
 def main() -> int:
     try:
         verify_skill()
-        verify_json(ROOT / "plugins" / "preserve-project-intent" / ".codex-plugin" / "plugin.json", "preserve-project-intent")
-        verify_json(ROOT / "plugin" / "preserve-project-intent" / ".claude-plugin" / "plugin.json", "preserve-project-intent")
+        verify_manifests()
+        verify_eval_cases()
         marketplace = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8"))
         entries = marketplace.get("plugins", [])
         if len(entries) != 1 or entries[0].get("name") != "preserve-project-intent":

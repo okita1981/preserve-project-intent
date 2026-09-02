@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "preserve-project-intent",
   "displayName": "Preserve Project Intent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Preserves the primary mission, current milestone, completion boundary, and return point across long-running projects, nested blockers, reviews, and session handoffs.",
   "author": {
     "name": "Kousuke Okita / 沖田紘亮",

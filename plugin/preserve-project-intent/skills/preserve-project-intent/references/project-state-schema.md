@@ -10,6 +10,16 @@ Place this block near the beginning of a handoff so current truth is encountered
 state_version: 1
 updated_at: YYYY-MM-DD
 
+persistence:
+  enabled: false
+  state_file: <user-approved path or null>
+  update_on:
+    - milestone_change
+    - blocker_opened
+    - blocker_cleared
+    - return_point_change
+    - session_handoff
+
 project:
   name: <project name>
   canonical_sources:
@@ -45,6 +55,9 @@ blocker:
   status: NONE | OPEN | CLEARED
   non_goals:
     - <hardening or generalization not required to clear it>
+  contract_frozen_at: <timestamp or null>
+  approved_revisions:
+    - <old value, new value, evidence, scope effect, and user approval>
 
 return_point:
   id: <task or decision identifier>
@@ -77,6 +90,19 @@ next_action:
 - A cleared blocker may remain in the state for continuity, but its return point becomes active.
 - History must not overwrite current truth. When facts changed, state the current value and put the old value in the history section.
 - Do not place credentials, tokens, or unnecessary personal data in a handoff.
+
+## Optional persistent state
+
+Persistence is opt-in. During INIT, the user may approve a project-local state path such as `.preserve-intent/state.yaml` or another location appropriate to the repository. If no path is approved, keep `enabled: false` and use the handoff as the state carrier.
+
+When enabled:
+
+- update only on the listed material transitions, not after every command;
+- keep current truth and compact evidence, not a chronological log;
+- compare the existing state before writing and report conflicts rather than overwriting them;
+- treat a write as a file mutation requiring the task's authorization;
+- never infer permission to commit, push, deploy, or mutate external state;
+- let HANDOFF point to the current state file and add the detailed context needed by a new agent.
 
 ## Compact checkpoint
 

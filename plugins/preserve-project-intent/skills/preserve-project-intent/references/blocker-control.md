@@ -39,6 +39,28 @@ non_goals:
 
 Avoid defining the resolution as “prevent every possible recurrence.” Prefer a control proportional to the observed risk and the project's existing architecture.
 
+### Freeze the contract
+
+When blocker work starts, freeze these fields together:
+
+- `minimum_resolution`
+- `evidence_to_clear`
+- `return_point`
+- `non_goals`
+
+The agent cannot expand or replace them through self-approval. If new evidence shows the contract is insufficient, stop and request explicit user approval. Record the previous value, proposed value, new evidence, effect on the main line, and approval. Until approval, continue only within the frozen contract or park the new finding.
+
+## Derivation depth
+
+| Depth | Origin | Default action |
+|---|---|---|
+| 0 | Main-line active task | Execute normally |
+| 1 | Blocker directly preventing Depth 0 | Resolve under the frozen contract |
+| 2 | Finding discovered while resolving Depth 1 | Mandatory scope-expansion checkpoint |
+| 3+ | Finding derived from another derived finding | Park; do not start without explicit user approval |
+
+Depth is determined by where the finding was discovered, not by how important or technically interesting it appears.
+
 ## Scope-expansion checkpoint
 
 Pause and reclassify before proceeding when:
@@ -58,7 +80,7 @@ At the checkpoint, answer:
 4. What is the cost of parking it?
 5. Does it change the user's agreed scope?
 
-Proceed only when the answers support necessity. Otherwise simplify, park, or request a deliberate scope change.
+At Depth 2, proceed only when the answers support necessity without changing the frozen contract. If the contract must change, request explicit user approval. At Depth 3 or greater, the checkpoint cannot self-authorize work: park it or obtain explicit user approval.
 
 ## Review-loop control
 

@@ -1,6 +1,6 @@
 ---
 name: preserve-project-intent
-description: Preserve the primary mission, current milestone, completion boundary, and return point across long-running projects, nested blockers, implementation gates, reviews, and session handoffs. Use when starting or resuming multi-session work, handling a problem discovered inside a larger project, deciding whether local completion means the milestone or mission is complete, or preparing/consuming a detailed handoff. Do not use for isolated one-step tasks with no continuing project state.
+description: Preserve the mission, milestone, completion boundary, and return point in continuing projects. Use when work spans sessions, an existing mission governs the task, a blocker interrupts a larger project, or a handoff is created or consumed. Do not use for isolated one-step tasks without continuing project state.
 ---
 
 # Preserve Project Intent
@@ -28,7 +28,15 @@ For a new or materially re-scoped project, read [Project state schema](reference
 - **HANDOFF** — produce the canonical handoff and the next-session bootstrap prompt.
 - **RESUME** — consume a handoff, verify alignment, and restart from its return point.
 
-Use the lightest mode that fits. Do not burden ordinary short tasks with project ceremony.
+Choose the mode with this procedure:
+
+1. No canonical state exists, or the mission, milestone outcome, success condition, primary metric, non-goal, or operation boundary is being changed: **INIT**.
+2. An existing project is being executed, reviewed, corrected, or unblocked: **CONTROL**.
+3. The session or agent is being changed: **HANDOFF**.
+4. Existing state is being consumed to restart work: **RESUME**.
+5. No continuing mission, milestone, or return point exists: do not use this skill.
+
+Use the lightest applicable mode. A material re-scope means changing one of the state elements listed for INIT; it is not merely changing implementation detail.
 
 ## Control the active work
 
@@ -40,6 +48,8 @@ Before entering a blocker, record:
 - explicit non-goals;
 - the evidence that will show it is cleared.
 
+Once blocker work begins, freeze `minimum_resolution`, `evidence_to_clear`, `return_point`, and `non_goals`. Do not revise them on the agent's own judgment. If new evidence proves the contract insufficient, stop at a scope-expansion checkpoint and obtain the user's explicit approval for the old value, new value, reason, and scope effect before continuing.
+
 Classify new findings as `BLOCKING`, `REQUIRED`, `ADJACENT`, or `OVERREACH`. Work on `BLOCKING` and `REQUIRED` findings within the current scope. Record `ADJACENT` findings for later. Decline or simplify `OVERREACH` unless the user deliberately expands scope.
 
 Trigger a scope-expansion checkpoint when a proposed response to a finding:
@@ -49,6 +59,8 @@ Trigger a scope-expansion checkpoint when a proposed response to a finding:
 - produces a second-order finding inside an already derived task;
 - materially increases implementation or verification relative to the blocked main-line work; or
 - optimizes theoretical completeness instead of restoring safe progress.
+
+Track derivation depth mechanically: the main-line task is Depth 0, its blocker is Depth 1, and a finding discovered inside blocker work is Depth 2. Depth 2 always triggers a checkpoint. Depth 3 or greater is parked by default and must not be started without explicit user approval.
 
 At the checkpoint, choose among: continue as necessary, use a simpler sufficient fix, park the finding, or ask the user to approve a genuine scope change. Read [Blocker control](references/blocker-control.md) when blockers, nested findings, hardening, review loops, or broad corrective work are involved.
 
@@ -79,6 +91,8 @@ After a material gate, decision, blocker transition, or measurable result, updat
 
 Treat a roadmap or handoff as current state, not a chronological work diary. Put current truth before history.
 
+For projects that opt into persistent state, read [Project state schema](references/project-state-schema.md). Persistence is off by default and never grants permission to modify files, commit, push, or change external state.
+
 ## HANDOFF mode
 
 Produce two distinct deliverables:
@@ -95,21 +109,24 @@ Read and follow [Handoff protocol](references/handoff-protocol.md). Use the cano
 Read the handoff completely before changing code, data, production, documents, or external state. Then:
 
 1. extract the canonical state;
-2. compare it with the detailed body and any named authoritative artifacts available;
-3. separate mission, milestone, task, blocker, and return point;
-4. report contradictions instead of silently resolving them;
-5. state what is complete and what is not;
-6. identify the first main-line action;
-7. wait for alignment when the user requested a read-only handoff check.
+2. compare it with the detailed body;
+3. when a named authoritative artifact is accessible and read-only inspection is authorized, perform at least one inexpensive mechanical check against it before claiming artifact alignment;
+4. separate mission, milestone, task, blocker, and return point;
+5. report contradictions instead of silently resolving them;
+6. state what is complete and what is not;
+7. identify the first main-line action;
+8. wait for alignment when the user requested a read-only handoff check.
 
 Use a compact alignment result such as:
 
 ```text
-HANDOFF_ALIGNED
+HANDOFF_ALIGNED_WITH_ARTIFACTS
 MISSION_IN_PROGRESS
 MILESTONE_IN_PROGRESS
 RESUME_FROM_<RETURN_POINT>
 ```
+
+Use `HANDOFF_INTERNALLY_CONSISTENT_ONLY` when no authoritative artifact is accessible or inspection is not authorized. Use `HANDOFF_CONFLICT_FOUND` for a material contradiction. Never use an unqualified `HANDOFF_ALIGNED` claim.
 
 Do not restart a cleared blocker merely because its history is detailed. Do not reinterpret the latest incident as the project's purpose.
 

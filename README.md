@@ -64,6 +64,10 @@ flowchart TD
 
 派生課題の中からさらに課題が見つかった場合や、新しい解析基盤・汎用機構が必要になった場合は、無条件に進めずScope Expansion Checkpointを行います。
 
+Blocker作業を開始した時点で、`minimum_resolution`、`evidence_to_clear`、`return_point`、`non_goals`を凍結します。新しい証拠によって変更が必要になった場合も、Agentの自己判断では拡張せず、変更前後・理由・影響を示してユーザーの明示承認を得ます。
+
+派生深度は、本線をDepth 0、直接のBlockerをDepth 1、Blocker内で見つかった課題をDepth 2として扱います。Depth 2は必ずCheckpoint、Depth 3以上は原則Parkingです。
+
 ## セッションを跨ぐ仕組み
 
 Skill自体は、特定プロジェクトの現在地を永続記憶しません。次の3点を分離します。
@@ -75,6 +79,12 @@ Skill自体は、特定プロジェクトの現在地を永続記憶しません
 | 起動プロンプト | 新セッションでSkillと引き継ぎ正本を正しく読み込ませる |
 
 HANDOFFモードは、単なる時系列要約ではなく、冒頭に機械可読なCanonical Stateを持つ詳細な`.md`を作ります。RESUMEモードは全文を確認し、変更を始める前にMission、Milestone、定量的な現在地、完了済み、未完了、Blocker状態、Return Pointを返します。
+
+RESUMEの整合判定は、正本を機械的に1件以上照合した`HANDOFF_ALIGNED_WITH_ARTIFACTS`と、文書内部だけを確認した`HANDOFF_INTERNALLY_CONSISTENT_ONLY`を分離します。正本へアクセスできない場合に、外部照合済みとは主張しません。
+
+### 任意の状態永続化
+
+長期プロジェクトでは、INIT時に保存先を承認して、`.preserve-intent/state.yaml`などをProject State正本として使用できます。既定はOFFです。有効化した場合も、Milestone変更、Blocker開始・解消、Return Point変更、HANDOFFなどの重要な遷移時だけ更新し、commit、push、deployや外部変更の権限は付与しません。
 
 ## 使い方
 
@@ -186,6 +196,7 @@ plugins/preserve-project-intent/         Codex Plugin
 plugin/preserve-project-intent/          Claude Code Plugin
 .agents/plugins/marketplace.json         Codex向けMarketplace定義
 scripts/                                 同期・構造・同一性の検証
+evals/                                   発火すべき／すべきでない入力fixture
 .github/workflows/verify.yml             push / PRごとのCI
 ```
 
@@ -193,6 +204,7 @@ scripts/                                 同期・構造・同一性の検証
 
 - 自動発動は各ホストの選択を含むため、100%は保証されません。重要な開始・引き継ぎ・再開では明示的に呼び出してください。
 - Skillだけでプロジェクト固有の状態は永続化されません。引き継ぎ正本またはプロジェクトのCanonical Stateを維持してください。
+- 状態永続化はオプトインです。保存先とファイル変更が承認されていない場合、Skillは状態ファイルを書きません。
 - このSkillは、必要な安全対策や検証を省略するためのものではありません。本線との関係とリスクに比例した必要十分性を判断します。
 
 ## Author

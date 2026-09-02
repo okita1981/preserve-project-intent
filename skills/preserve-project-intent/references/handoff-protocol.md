@@ -54,7 +54,8 @@ report:
 
 Report contradictions rather than silently resolving them. End with:
 
-HANDOFF_ALIGNED or HANDOFF_CONFLICT_FOUND
+HANDOFF_ALIGNED_WITH_ARTIFACTS, HANDOFF_INTERNALLY_CONSISTENT_ONLY,
+or HANDOFF_CONFLICT_FOUND
 MISSION_<STATUS>
 MILESTONE_<STATUS>
 RESUME_FROM_<RETURN_POINT>
@@ -79,7 +80,17 @@ Before delivering the handoff, verify:
 
 ## Resume validation
 
-The receiving agent reads the entire handoff, then compares the Canonical State with the detailed sections. It must not rely on the last section or the longest incident narrative. If authoritative artifacts are available and the task authorizes inspection, compare relevant state before mutation.
+The receiving agent reads the entire handoff, then compares the Canonical State with the detailed sections. It must not rely on the last section or the longest incident narrative.
+
+If a named authoritative artifact is accessible and read-only inspection is authorized, perform at least one inexpensive mechanical comparison before claiming artifact alignment. Choose a check relevant to the claimed state, such as the current commit, existence or hash of a named file, PR merge state, snapshot identifier, or canonical metric. Record what was checked and the observed value.
+
+Use exactly one evidence level:
+
+- `HANDOFF_ALIGNED_WITH_ARTIFACTS` — internal comparison passed and at least one authoritative artifact check passed.
+- `HANDOFF_INTERNALLY_CONSISTENT_ONLY` — the handoff agrees with itself, but artifacts were unavailable, unnamed, or inspection was not authorized.
+- `HANDOFF_CONFLICT_FOUND` — a contradiction affects the next action, scope, completion status, metric, or safety boundary.
+
+Never use an unqualified `HANDOFF_ALIGNED` claim. Do not perform a mutation merely to verify a handoff.
 
 Use `HANDOFF_CONFLICT_FOUND` when a contradiction would change the next action, scope, completion status, or safety boundary. Describe the conflict and wait for resolution when necessary. Minor wording differences that do not affect action may be noted without blocking.
 
