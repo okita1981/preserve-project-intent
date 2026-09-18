@@ -251,6 +251,21 @@ Claude Code Pluginの`evals/`には、次の独立した評価指標を収録し
 
 Claude Code v2.1.269以降で、Pluginディレクトリから実行します。
 
+最初にRESUME正常系だけを1回実行し、`--keep-temp`が表示するsandbox内で`resources/handoff.md`のReadが成功したことをtranscriptから確認します。
+
+```bash
+cd plugin/preserve-project-intent
+claude plugin eval . --case resume-internal-consistency --model claude-sonnet-5 --runs 1 --ablation none --keep-temp --no-publish
+```
+
+fixture解決を確認した後、全ケースを1 arm・1 runでsmoke testします。
+
+```bash
+claude plugin eval . --model claude-sonnet-5 --runs 1 --ablation none --keep-temp --no-publish
+```
+
+smoke testが通った後、既定の3 runs × 2 armsで基準値を取得します。
+
 ```bash
 cd plugin/preserve-project-intent
 claude plugin eval . --model claude-sonnet-5

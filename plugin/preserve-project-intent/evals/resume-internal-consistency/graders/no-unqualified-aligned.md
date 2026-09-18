@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '(?m)^\s*HANDOFF_ALIGNED\s*$'
+pattern: 'HANDOFF_ALIGNED(?!_)'
 match: not_contains
 target: last_message
 ---

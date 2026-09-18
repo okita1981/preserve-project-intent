@@ -136,6 +136,10 @@ def verify_plugin_evals() -> None:
             if not case_config.is_file() or not (case / "resources" / "handoff.md").is_file():
                 fail("RESUME normal-path eval fixture is incomplete")
             config_text = case_config.read_text(encoding="utf-8")
+            if 'schema_version: "1.1"' not in config_text:
+                fail("RESUME normal-path eval schema version is missing")
+            if "name: resume-internal-consistency" not in config_text:
+                fail("RESUME normal-path eval name is missing")
             if "add_dirs:" not in config_text or "resources" not in config_text:
                 fail("RESUME normal-path eval does not expose its fixture")
         grader_files = list(graders.glob("*.md"))
