@@ -100,7 +100,7 @@ next_action:
 
 ## Optional persistent state
 
-Persistence is opt-in. During INIT, the user may approve a project-local state path such as `.preserve-intent/state.yaml` or another location appropriate to the repository. If no path is approved, keep `enabled: false` and use the handoff as the state carrier.
+Persistence is opt-in. During INIT, ask exactly once whether to enable it and propose a project-local state path such as `.preserve-intent/state.yaml` or another location appropriate to the repository. Strongly recommend it when the project will span sessions, parallel agents, unattended execution, or likely context compaction. Record an accepted or declined decision so later turns do not repeatedly ask. If no path is approved or no approver is available, keep `enabled: false` and use the handoff as the state carrier. Do not treat the recommendation itself as permission to create or edit the file.
 
 When enabled:
 

@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -56,6 +58,27 @@ def verify_manifests() -> None:
         fail("Codex and Claude plugin versions differ")
 
 
+def verify_marketplaces() -> None:
+    codex_path = ROOT / ".agents" / "plugins" / "marketplace.json"
+    codex = json.loads(codex_path.read_text(encoding="utf-8"))
+    codex_entries = codex.get("plugins", [])
+    if len(codex_entries) != 1 or codex_entries[0].get("name") != "preserve-project-intent":
+        fail("Codex marketplace entry is incorrect")
+
+    claude_path = ROOT / ".claude-plugin" / "marketplace.json"
+    claude = json.loads(claude_path.read_text(encoding="utf-8"))
+    if claude.get("name") != "preserve-project-intent":
+        fail("Claude marketplace name is incorrect")
+    claude_entries = claude.get("plugins", [])
+    if len(claude_entries) != 1 or claude_entries[0].get("name") != "preserve-project-intent":
+        fail("Claude marketplace entry is incorrect")
+    source = claude_entries[0].get("source")
+    if source != "./plugin/preserve-project-intent":
+        fail("Claude marketplace source is incorrect")
+    if not (ROOT / source).is_dir():
+        fail("Claude marketplace source does not exist")
+
+
 def verify_trigger_fixtures() -> None:
     """Validate fixture structure only; this does not evaluate model behavior."""
     path = ROOT / "fixtures" / "trigger-cases.json"
@@ -88,15 +111,58 @@ def verify_trigger_fixtures() -> None:
             fail("invalid expected value in boundary_cases")
 
 
+def verify_plugin_evals() -> None:
+    eval_root = ROOT / "plugin" / "preserve-project-intent" / "evals"
+    required_cases = {
+        "local-completion-boundary",
+        "depth2-checkpoint",
+        "return-point",
+        "missing-resume-state",
+        "init-persistence-decision",
+        "unrelated-one-step",
+    }
+    actual_cases = {path.name for path in eval_root.iterdir() if path.is_dir() and path.name != "results"}
+    if actual_cases != required_cases:
+        fail("Claude plugin eval case set is incorrect")
+    for case_name in required_cases:
+        case = eval_root / case_name
+        prompt = case / "prompt.md"
+        graders = case / "graders"
+        if not prompt.is_file() or not graders.is_dir():
+            fail(f"incomplete Claude plugin eval case: {case_name}")
+        grader_files = list(graders.glob("*.md"))
+        if not grader_files:
+            fail(f"Claude plugin eval case has no graders: {case_name}")
+        for path in [prompt, *grader_files]:
+            text = path.read_text(encoding="utf-8")
+            if not text.startswith("---\n") or "\n---\n" not in text[4:]:
+                fail(f"invalid eval frontmatter: {path.relative_to(ROOT)}")
+
+
+def verify_with_claude_cli() -> None:
+    claude = shutil.which("claude")
+    required = os.environ.get("REQUIRE_CLAUDE_PLUGIN_VALIDATE") == "1"
+    if claude is None:
+        if required:
+            fail("Claude CLI is required but was not found")
+        print("Claude CLI not found; skipping official plugin validation.")
+        return
+    for path in (ROOT, ROOT / "plugin" / "preserve-project-intent"):
+        subprocess.run(
+            [claude, "plugin", "validate", str(path)],
+            cwd=ROOT,
+            check=True,
+        )
+
+
 def main() -> int:
     try:
         verify_skill()
         verify_manifests()
+        verify_marketplaces()
         verify_trigger_fixtures()
-        marketplace = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8"))
-        entries = marketplace.get("plugins", [])
-        if len(entries) != 1 or entries[0].get("name") != "preserve-project-intent":
-            fail("Codex marketplace entry is incorrect")
+        verify_plugin_evals()
+        verify_with_claude_cli()
         subprocess.run(
             [sys.executable, str(ROOT / "scripts" / "sync-distributions.py"), "--check"],
             cwd=ROOT,

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "preserve-project-intent",
+  "description": "Project-intent control for long-running and parallel AI work.",
+  "owner": {
+    "name": "Kousuke Okita / 沖田紘亮",
+    "url": "https://github.com/okita1981"
+  },
+  "plugins": [
+    {
+      "name": "preserve-project-intent",
+      "source": "./plugin/preserve-project-intent",
+      "description": "Prevent mission drift across long-running and parallel AI work."
+    }
+  ]
+}

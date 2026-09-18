@@ -86,6 +86,10 @@ At the checkpoint, answer:
 
 At Depth 2, proceed only when the answers support necessity without changing the frozen contract. If the contract must change, request explicit user approval. At Depth 3 or greater, the checkpoint cannot self-authorize work: park it or obtain explicit user approval.
 
+### Unattended execution
+
+When no human approver is available, a checkpoint cannot authorize a scope change. Park a finding and continue only when the frozen contract or return point still provides a safe and correct main-line action. If the unresolved choice blocks safe or correct continuation, record the finding, required decision, current state, and return point, then stop. Do not reinterpret silence, non-interactive mode, auto mode, or a schedule as approval.
+
 ## Review-loop control
 
 A review finding is evidence about a change, not automatic authority to expand the project. For each finding:

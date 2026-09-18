@@ -1,11 +1,11 @@
 ---
 name: preserve-project-intent
-description: Preserve the mission, milestone, completion boundary, and return point in continuing projects. Use when work explicitly spans sessions, a blocker interrupts a stated larger project, or a handoff is created or consumed. Do not use for isolated one-step tasks without continuing project state.
+description: Prevent long-running or parallel AI work from drifting away from the project's mission, milestone, completion boundary, and return point. Use when work spans sessions or agents, a blocker interrupts a stated larger project, or a handoff is created or consumed. Do not use for isolated one-step tasks without continuing project state.
 ---
 
 # Preserve Project Intent
 
-Keep local work subordinate to the value the project exists to create. A blocker may interrupt the main line; it must not silently replace it.
+Keep local and parallel work subordinate to the value the project exists to create. A blocker, corrective task, or worker thread may interrupt or support the main line; it must not silently replace it. Native conversation history, project memory, and orchestration can carry or execute state, but they do not replace this skill's completion boundaries and return discipline.
 
 ## Establish the project stack
 
@@ -23,7 +23,7 @@ For a new or materially re-scoped project, read [Project state schema](reference
 
 ## Select the operating mode
 
-- **INIT** — establish the stack, success conditions, metrics, non-goals, and authoritative state.
+- **INIT** — establish the stack, success conditions, metrics, non-goals, authoritative state, and the persistence decision.
 - **CONTROL** — execute or supervise work while classifying discoveries and preventing scope capture.
 - **HANDOFF** — produce the canonical handoff and the next-session bootstrap prompt.
 - **RESUME** — consume a handoff, verify alignment, and restart from its return point.
@@ -38,6 +38,8 @@ Choose the mode with this procedure:
 6. An established continuing project is being executed, reviewed, corrected, or unblocked: **CONTROL**.
 
 Use the lightest applicable mode. A material re-scope means changing one of the state elements listed for INIT; it is not merely changing implementation detail.
+
+During INIT, ask exactly once whether to persist canonical project state and propose an appropriate project-local path. Do not ask again when the current canonical state already records an accepted or declined persistence decision. If no approver is available, keep persistence disabled, report that choice, and continue only if the remaining work is safe without it.
 
 When this skill applies, begin the first material response with `MODE: INIT`, `MODE: CONTROL`, `MODE: HANDOFF`, or `MODE: RESUME`. Declare it again only when the mode changes. Routing outcomes use `ROUTING: ASK_FOR_STATE` or, only after explicit invocation, `ROUTING: NOT_APPLICABLE`.
 
@@ -94,7 +96,11 @@ After a material gate, decision, blocker transition, or measurable result, updat
 
 Treat a roadmap or handoff as current state, not a chronological work diary. Put current truth before history.
 
-For projects that opt into persistent state, read [Project state schema](references/project-state-schema.md). Persistence is off by default and never grants permission to modify files, commit, push, or change external state.
+During INIT, make the one-time persistence decision required above. Strongly recommend persistent state when the project will span sessions, parallel agents, unattended execution, or likely context compaction. Persistence remains off until the user approves a state path and the required file mutation. When enabled, read and maintain [Project state schema](references/project-state-schema.md). Persistence never grants permission to commit, push, deploy, or change external state.
+
+## Continue without an available approver
+
+In non-interactive, scheduled, or otherwise unattended execution, never self-approve a scope expansion. Park findings that do not block the main line and continue within the frozen contract or from the return point. If safe or correct continuation requires a decision outside that contract, report the required decision and current canonical state, then stop. Read [Blocker control](references/blocker-control.md) for the unattended checkpoint rule.
 
 ## HANDOFF mode
 

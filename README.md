@@ -2,13 +2,15 @@
 
 [![verify](https://github.com/okita1981/preserve-project-intent/actions/workflows/verify.yml/badge.svg)](https://github.com/okita1981/preserve-project-intent/actions/workflows/verify.yml)
 
-長期プロジェクトで、途中に見つかった課題や是正作業が本来の目的へすり替わることを防ぐためのAgent Skillです。
+長期・並列化するAIプロジェクトで、途中に見つかった課題や是正作業が本来の目的へすり替わることを防ぐための、GPT / Codex / Claude Code共通のAgent Skillです。
 
-Mission、Milestone、Active Task、Blocker、Return Pointを分離し、Blockerを必要十分な範囲で解消した後、必ず本線へ戻します。セッションを跨ぐ場合は、詳細な引き継ぎ正本と次セッション用の起動プロンプトを作り、GPT、Codex、Claude Codeの間でも現在地を維持します。
+Mission、Milestone、Active Task、Blocker、Return Pointを分離し、Blockerを必要十分な範囲で解消した後、必ず本線へ戻します。下位TaskやBlockerの完了を、MilestoneやMissionの完了とはみなしません。
+
+各プラットフォームの会話履歴、プロジェクトメモリ、並列実行機能とは競合しません。それらが「作業を継続する仕組み」だとすれば、このSkillは「継続する作業を本来の成果へ向け続けるための統制層」です。セッションやプラットフォームを跨ぐ場合は、詳細な引き継ぎ正本と次セッション用の起動プロンプトを作り、GPT、Codex、Claude Codeの間でも現在地と本来の目的を維持します。
 
 ## なぜ必要か
 
-長期プロジェクトでは、次のような目的のすり替わりが起きやすくなります。
+AIエージェントが長時間・並列に作業できても、各作業が本来の成果へ収束するとは限りません。長期プロジェクトでは、次のような目的のすり替わりが起きやすくなります。
 
 ```text
 本来の成果へ進む
@@ -48,7 +50,7 @@ flowchart TD
 
 | モード | 使用場面 | 主な出力 |
 |---|---|---|
-| `INIT` | 長期プロジェクトの開始・再定義 | Mission、Milestone、成功条件、指標、Non-goals |
+| `INIT` | 長期プロジェクトの開始・再定義 | Mission、Milestone、成功条件、指標、Non-goals、状態永続化の選択 |
 | `CONTROL` | 実行中・レビュー中・是正中 | 課題分類、minimum resolution、Return Point |
 | `HANDOFF` | セッション終了時 | 詳細な引き継ぎ正本`.md`＋次セッション用プロンプト |
 | `RESUME` | 新セッション開始時 | 現在地の理解確認、矛盾検出、本線の再開地点 |
@@ -72,7 +74,13 @@ Skill適用時の最初の状態報告では`MODE: INIT`、`MODE: CONTROL`、`MO
 
 派生深度は、本線をDepth 0、直接のBlockerをDepth 1、Blocker内で見つかった課題をDepth 2として扱います。Depth 2は必ずCheckpoint、Depth 3以上は原則Parkingです。同じDepth 1解決策からDepth 2が3件出た場合は個別処理を止め、解決策そのものを簡素化・置換・撤去できないか再検討します。
 
-## セッションを跨ぐ仕組み
+## ネイティブな継続機能との関係
+
+会話履歴、プロジェクトメモリ、クラウド実行、並列スレッドなどは、作業を長く継続するための実行基盤です。このSkillは、それらの代替ではなく、Mission、完了境界、Blockerの必要十分性、Return Pointを明示して目的ドリフトを防ぐ統制層です。
+
+ホストが提供するメモリ機能は、承認された場合にProject Stateの保存先として利用できます。ただし、保存された情報の存在だけから本線との整合や上位レベルの完了を推論しません。ホスト固有の機能を前提にせず、同じ中核ルールをGPT、Codex、Claude Codeで適用します。
+
+## セッションやプラットフォームを跨ぐ仕組み
 
 Skill自体は、特定プロジェクトの現在地を永続記憶しません。次の3点を分離します。
 
@@ -88,7 +96,9 @@ RESUMEの整合判定は、正本を機械的に1件以上照合した`HANDOFF_A
 
 ### 任意の状態永続化
 
-長期プロジェクトでは、INIT時に保存先を承認して、`.preserve-intent/state.yaml`などをProject State正本として使用できます。既定はOFFです。有効化した場合も、Milestone変更、Blocker開始・解消、Return Point変更、HANDOFFなどの重要な遷移時だけ更新し、commit、push、deployや外部変更の権限は付与しません。
+INITでは、状態永続化を有効にするか一度だけ確認し、`.preserve-intent/state.yaml`などのProject State正本候補を提示します。承認または辞退の結果を現在のCanonical Stateへ記録し、同じ初期化について繰り返し質問しません。複数セッション、並列Agent、無人実行、auto-compactionを伴う長期プロジェクトでは利用を強く推奨します。
+
+既定はOFFであり、Skillの適用や推奨だけからファイル変更権限を推論しません。有効化した場合も、Milestone変更、Blocker開始・解消、Return Point変更、HANDOFFなどの重要な遷移時だけ更新し、commit、push、deployや外部変更の権限は付与しません。
 
 Blockerの`depth2_findings`には、同じDepth 1解決策から発生した派生課題を解決済み・Parking済みも含めて保持します。件数は一覧から導出し、HANDOFFを跨いでもBreadth limitをリセットしません。
 
@@ -177,6 +187,38 @@ Claude Code Plugin向けパッケージも[`plugin/preserve-project-intent/`](pl
 claude --plugin-dir ./plugin/preserve-project-intent
 ```
 
+Plugin経由ではスキル名が名前空間化されます。正式な呼び出し名は次のとおりです。
+
+```text
+/preserve-project-intent:preserve-project-intent
+```
+
+競合がなければ短縮形`/preserve-project-intent`も使用できますが、ドキュメントや自動化では正式名を推奨します。
+
+### Claude Code Marketplaceから使う
+
+リポジトリルートの[`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json)をClaude Code Marketplace定義として使用できます。
+
+```text
+/plugin marketplace add okita1981/preserve-project-intent
+/plugin install preserve-project-intent@preserve-project-intent
+```
+
+### Claude Projects / claude.aiで使う
+
+Claude公式ドキュメントでは、Claude Projectsの各ThreadであるCloud Sessionは、Projectに登録したGitHubリポジトリ内の`.claude/skills/`を読み込む仕様です。このリポジトリをProjectへ登録した場合、収録済みのProject Skillが利用対象になります。
+
+このリポジトリ以外のProject、Cowork、またはリポジトリを持たない作業で個人Skillとして使う場合は、`skills/preserve-project-intent/`をzip化してclaude.aiのSettingsからアップロードします。claude.aiへアップロードしたSkillはユーザーアカウント単位で管理され、Claude CodeのローカルSkillとは別に配布されます。現在の正本フロントマターは、claude.aiで許可される`name`と`description`だけを使用しています。
+
+現時点の確認状況は次のとおりです。`DOCUMENTED`はClaude公式仕様で確認済み、`NOT_YET_TESTED`はこのリポジトリを使った実機確認が未実施という意味です。
+
+| 確認項目 | 公式仕様 | このリポジトリでの実機確認 |
+|---|---|---|
+| Project登録リポジトリの`.claude/skills/`検出 | `DOCUMENTED` | `NOT_YET_TESTED` |
+| Skillからの`references/`解決 | supporting filesとして`DOCUMENTED` | `NOT_YET_TESTED` |
+| リポジトリ経由で適用されるfrontmatter検証経路 | Claude Code Skillとして`DOCUMENTED` | `NOT_YET_TESTED` |
+| claude.ai zipアップロードの6フィールド制約 | `DOCUMENTED` | `NOT_YET_TESTED` |
+
 ## 正本と同期方針
 
 唯一の編集正本は[`skills/preserve-project-intent/`](skills/preserve-project-intent)です。以下は正本から生成する派生コピーです。
@@ -193,6 +235,28 @@ python scripts/sync-distributions.py --check
 python scripts/verify.py
 ```
 
+`scripts/verify.py`はClaude CLIが利用可能な環境では、`claude plugin validate`によってMarketplaceとClaude Code Pluginも検証します。CIではClaude CLIを必須にし、公式validatorを省略しません。
+
+### 挙動評価
+
+Claude Code Pluginの`evals/`には、次の独立した評価指標を収録しています。
+
+- `BLOCKER_CLEARED`を`MILESTONE_COMPLETE`と誤認しない
+- Depth 2 findingでscope-expansion checkpointを出す
+- Blocker解消後に凍結済みReturn Pointへ戻る
+- 状態不足のRESUMEで推測せず`ASK_FOR_STATE`を返す
+- INITで状態永続化の選択を一度確認する
+- 無関係な単発作業ではSkillを発火しない
+
+Claude Code v2.1.269以降で、Pluginディレクトリから実行します。
+
+```bash
+cd plugin/preserve-project-intent
+claude plugin eval .
+```
+
+Plugin evalは実モデルを呼び出し、プラン使用量またはAPI料金を消費します。そのため通常のpush / PRでは自動実行せず、リリース前またはSkill設計のA/B比較時に手動で実行します。`evals/results/`はGit管理しません。
+
 ## ディレクトリ構成
 
 ```text
@@ -201,8 +265,10 @@ skills/preserve-project-intent/          GPT / Codex向け正本
 plugins/preserve-project-intent/         Codex Plugin
 plugin/preserve-project-intent/          Claude Code Plugin
 .agents/plugins/marketplace.json         Codex向けMarketplace定義
+.claude-plugin/marketplace.json          Claude Code向けMarketplace定義
 scripts/                                 同期・構造・同一性の検証
 fixtures/                                将来の発火評価に使う入力fixture
+plugin/preserve-project-intent/evals/    Claude Pluginの挙動評価
 .github/workflows/verify.yml             push / PRごとのCI
 ```
 
@@ -211,7 +277,8 @@ fixtures/                                将来の発火評価に使う入力fix
 - 自動発動は各ホストの選択を含むため、100%は保証されません。重要な開始・引き継ぎ・再開では明示的に呼び出してください。
 - `fixtures/trigger-cases.json`は将来の実モデル評価用データです。CIはファイル構造だけを確認し、Skillの発火精度やモデル挙動を評価していません。
 - Skillだけでプロジェクト固有の状態は永続化されません。引き継ぎ正本またはプロジェクトのCanonical Stateを維持してください。
-- 状態永続化はオプトインです。保存先とファイル変更が承認されていない場合、Skillは状態ファイルを書きません。
+- 状態永続化はオプトインですが、複数セッション、並列Agent、無人実行、auto-compactionを伴う場合は強く推奨します。保存先とファイル変更が承認されていない場合、Skillは状態ファイルを書きません。
+- 永続状態を使用しない長期セッションでは、会話のcompaction後にBlocker契約、Depth 2 findings、breadth判定、Return Pointなどのプロジェクト固有状態が要約・欠落する可能性があります。重要な遷移前にHANDOFFを作るか、承認済みのProject State正本を使用してください。
 - このSkillは、必要な安全対策や検証を省略するためのものではありません。本線との関係とリスクに比例した必要十分性を判断します。
 
 ## Author
