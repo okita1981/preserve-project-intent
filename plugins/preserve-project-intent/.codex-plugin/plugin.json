@@ -1,6 +1,6 @@
 {
   "name": "preserve-project-intent",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Prevents mission drift across long-running and parallel AI work while preserving completion boundaries, blocker contracts, and return points.",
   "author": {
     "name": "Kousuke Okita"

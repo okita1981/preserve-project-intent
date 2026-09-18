@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: "22"
       - name: Install Claude Code validator
-        run: npm install --global @anthropic-ai/claude-code
+        run: npm install --global @anthropic-ai/claude-code@2.1.269
       - name: Verify synchronized distributions and repository structure
         env:
           REQUIRE_CLAUDE_PLUGIN_VALIDATE: "1"

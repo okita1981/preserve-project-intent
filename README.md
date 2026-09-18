@@ -245,6 +245,7 @@ Claude Code Pluginの`evals/`には、次の独立した評価指標を収録し
 - Depth 2 findingでscope-expansion checkpointを出す
 - Blocker解消後に凍結済みReturn Pointへ戻る
 - 状態不足のRESUMEで推測せず`ASK_FOR_STATE`を返す
+- Artifactへアクセスできない正常RESUMEで内部整合性だけを宣言し、凍結済みReturn Pointへ戻る
 - INITで状態永続化の選択を一度確認する
 - 無関係な単発作業ではSkillを発火しない
 
@@ -252,10 +253,12 @@ Claude Code v2.1.269以降で、Pluginディレクトリから実行します。
 
 ```bash
 cd plugin/preserve-project-intent
-claude plugin eval .
+claude plugin eval . --model claude-sonnet-5
 ```
 
-Plugin evalは実モデルを呼び出し、プラン使用量またはAPI料金を消費します。そのため通常のpush / PRでは自動実行せず、リリース前またはSkill設計のA/B比較時に手動で実行します。`evals/results/`はGit管理しません。
+`claude-sonnet-5`は単一の固定snapshotを指すモデルIDで、Skill変更前後の差を同じ条件で比較するための再現用基準です。現行モデルとの互換性を確認するときは、同じevalを`--model sonnet`でも補助的に実行します。Plugin evalは実モデルを呼び出し、プラン使用量またはAPI料金を消費します。そのため通常のpush / PRでは自動実行せず、リリース前またはSkill設計のA/B比較時に手動で実行します。`evals/results/`はGit管理しません。
+
+RESUMEの読み取り専用Skill分割は、正常系evalの基準値を取得してから同じモデル・fixtureでA/B比較します。分割版が正確性を改善し、発火や利用方法を悪化させないことを確認するまでは現行構成を維持します。
 
 ## ディレクトリ構成
 
@@ -287,4 +290,4 @@ Kousuke Okita / 沖田紘亮
 
 ## License
 
-このリポジトリの文書・Skillは、特記がない限り[Creative Commons Attribution 4.0 International](LICENSE)で提供します。利用・改変・再配布の際は、著作者と本リポジトリへの適切なクレジットを表示してください。
+Skill本文、supporting references、README、eval promptとgraderは[Creative Commons Attribution 4.0 International](LICENSE)で提供します。Pythonスクリプト、CI workflow、plugin／marketplace manifestなどのソフトウェアおよび機械可読設定は[MIT License](LICENSE-CODE)で提供します。

@@ -118,6 +118,7 @@ def verify_plugin_evals() -> None:
         "depth2-checkpoint",
         "return-point",
         "missing-resume-state",
+        "resume-internal-consistency",
         "init-persistence-decision",
         "unrelated-one-step",
     }
@@ -130,6 +131,13 @@ def verify_plugin_evals() -> None:
         graders = case / "graders"
         if not prompt.is_file() or not graders.is_dir():
             fail(f"incomplete Claude plugin eval case: {case_name}")
+        case_config = case / "case.yaml"
+        if case_name == "resume-internal-consistency":
+            if not case_config.is_file() or not (case / "resources" / "handoff.md").is_file():
+                fail("RESUME normal-path eval fixture is incomplete")
+            config_text = case_config.read_text(encoding="utf-8")
+            if "add_dirs:" not in config_text or "resources" not in config_text:
+                fail("RESUME normal-path eval does not expose its fixture")
         grader_files = list(graders.glob("*.md"))
         if not grader_files:
             fail(f"Claude plugin eval case has no graders: {case_name}")
